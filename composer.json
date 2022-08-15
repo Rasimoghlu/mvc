@@ -18,5 +18,8 @@
         "files": [
             "app/Http/Functions/helpers.php"
         ]
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^6.1"
     }
 }
