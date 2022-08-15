@@ -1,0 +1,22 @@
+{
+    "name": "rasimoghlu/mvc",
+    "authors": [
+        {
+            "name": "Rasimoghlu",
+            "email": "nasibovsarxan92@gmail.com"
+        }
+    ],
+    "require": {
+      "ext-pdo": "*",
+        "filp/whoops": "^2.14"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "./app",
+            "Core\\": "./core"
+        },
+        "files": [
+            "app/Http/Functions/helpers.php"
+        ]
+    }
+}
