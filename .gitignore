@@ -1,0 +1,8 @@
+/public/storage
+/public/images
+/vendor
+.env
+composer.lock
+package-lock.json
+.idea
+!.gitignore
