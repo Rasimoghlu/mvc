@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use App\Http\Exceptions\Whoops;
 use Bootstrap\Provider;
 
-class AppServiceProvider extends Provider
+class DotEnvServiceProvider extends Provider
 {
     public function register(){
 
@@ -13,6 +12,7 @@ class AppServiceProvider extends Provider
 
     public static function boot()
     {
-        Whoops::handle();
+        $env = \Dotenv\Dotenv::createUnsafeImmutable( __DIR__ . '/../../');
+        $env->load();
     }
 }

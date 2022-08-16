@@ -7,8 +7,9 @@
         }
     ],
     "require": {
-      "ext-pdo": "*",
-        "filp/whoops": "^2.14"
+        "ext-pdo": "*",
+        "filp/whoops": "^2.14",
+        "vlucas/phpdotenv": "^5.4"
     },
     "autoload": {
         "psr-4": {

@@ -11,13 +11,18 @@ class DatabaseConnection
     protected static $instannce;
     protected $connect;
 
-    private string $host = 'localhost';
-    private string $user = 'root';
-    private string $password = '';
-    private string $name = 'mvc';
+    private string $host;
+    private string $user;
+    private string $password;
+    private string $name;
 
     private function __construct()
     {
+        $this->dbHost();
+        $this->dbName();
+        $this->dbUser();
+        $this->dbPassword();
+
         try {
             $this->connect = new PDO("mysql:host=$this->host;dbname=$this->name", $this->user, $this->password);
             $this->connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -27,6 +32,26 @@ class DatabaseConnection
         } catch(PDOException $e) {
             echo "Connection failed: " . $e->getMessage();
         }
+    }
+
+    private function dbHost()
+    {
+        return $this->host = getenv('DB_HOST');
+    }
+
+    private function dbName()
+    {
+        return $this->name = getenv('DB_NAME');
+    }
+
+    private function dbUser()
+    {
+        return $this->user = getenv('DB_USER');
+    }
+
+    private function dbPassword()
+    {
+        return $this->password = getenv('DB_PASSWORD');
     }
 
     /**
