@@ -3,18 +3,16 @@
 namespace Core\Facades;
 
 use App\Http\Exceptions\MethodNotFoundException;
+use App\Interfaces\RouteInterface;
 use Core\Handlers\RouteHandler;
 
 class Router
 {
-    private RouteHandler $routeHandler;
-
     /**
      *
      */
-    public function __construct()
+    public function __construct(private readonly RouteInterface $routeHandler)
     {
-        $this->routeHandler = new RouteHandler();
     }
 
     /**
@@ -24,7 +22,7 @@ class Router
      */
     public static function __callStatic(string $name, array $arguments)
     {
-        return (new static())->$name(...$arguments);
+        return (new static(new RouteHandler()))->$name(...$arguments);
     }
 
     /**

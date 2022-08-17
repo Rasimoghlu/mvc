@@ -3,21 +3,16 @@
 namespace Core\Facades;
 
 use App\Http\Exceptions\MethodNotFoundException;
+use App\Interfaces\RequestInterface;
 use Core\Handlers\RequestHandler;
 
 class Request
 {
     /**
-     * @var RequestHandler
-     */
-    private RequestHandler $requestHandler;
-
-    /**
      *
      */
-    public function __construct()
+    public function __construct(private readonly RequestInterface $requestHandler)
     {
-        $this->requestHandler = new RequestHandler();
     }
 
     /**
@@ -27,7 +22,7 @@ class Request
      */
     public static function __callStatic(string $name, array $arguments)
     {
-        return (new static())->$name(...$arguments);
+        return (new static(new RequestHandler()))->$name(...$arguments);
     }
 
     /**

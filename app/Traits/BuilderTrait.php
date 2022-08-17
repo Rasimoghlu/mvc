@@ -112,10 +112,7 @@ trait BuilderTrait
      */
     protected array $params = [];
 
-    /**
-     * @param string $table
-     */
-    public function __construct(string $table)
+    public function __construct($table)
     {
         $this->table = $table;
         $this->db = DatabaseConnection::getInstance();

@@ -3,20 +3,18 @@
 namespace Core\Facades;
 
 use App\Http\Exceptions\MethodNotFoundException;
+use App\Interfaces\AuthInterface;
 use Core\Handlers\AuthHandler;
 
 class Auth
 {
-    private AuthHandler $authHandler;
-
-    public function __construct()
+    public function __construct(private readonly AuthInterface $authHandler)
     {
-        $this->authHandler = new AuthHandler();
     }
 
     public static function __callStatic(string $name, array $data)
     {
-        return (new static())->$name(...$data);
+        return (new static(new AuthHandler()))->$name(...$data);
     }
 
     /**

@@ -2,7 +2,9 @@
 
 namespace Core\Handlers;
 
-class ResponseHandler
+use App\Interfaces\ResponseInterface;
+
+class ResponseHandler implements ResponseInterface
 {
     /**
      * @param $data

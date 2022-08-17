@@ -3,21 +3,16 @@
 namespace Core\Facades;
 
 use App\Http\Exceptions\MethodNotFoundException;
+use App\Interfaces\ResponseInterface;
 use Core\Handlers\ResponseHandler;
 
 class Response
 {
     /**
-     * @var ResponseHandler
+     * @param ResponseInterface $responseHandler
      */
-    private ResponseHandler $responseHandler;
-
-    /**
-     *
-     */
-    public function __construct()
+    public function __construct(private readonly ResponseInterface $responseHandler)
     {
-        $this->responseHandler = new ResponseHandler();
     }
 
     /**
@@ -27,7 +22,7 @@ class Response
      */
     public static function __callStatic(string $name, array $arguments)
     {
-        return (new static())->$name(...$arguments);
+        return (new static(new ResponseHandler()))->$name(...$arguments);
     }
 
     /**

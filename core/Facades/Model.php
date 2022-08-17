@@ -3,6 +3,7 @@
 namespace Core\Facades;
 
 use App\Http\Exceptions\MethodNotFoundException;
+use App\Interfaces\BuilderInterface;
 use Core\Handlers\QueryBuilderHandler;
 
 class Model
@@ -10,7 +11,7 @@ class Model
     /**
      * @var string
      */
-    protected string $table;
+    protected string $table = '';
 
     /**
      * @var QueryBuilderHandler
@@ -32,6 +33,7 @@ class Model
      */
     public static function __callStatic(string $name, array $arguments)
     {
+
         return (new static())->$name(...$arguments);
     }
 

@@ -2,10 +2,21 @@
 
 namespace Core\Handlers;
 
-class RouteHandler
+use App\Interfaces\RouteInterface;
+
+class RouteHandler implements RouteInterface
 {
+    /**
+     * @var array
+     */
     protected array $params;
 
+    /**
+     * @param string $route
+     * @param callable|string $callback
+     * @param $method
+     * @return mixed|void
+     */
     public function run(string $route, callable|string $callback, $method = 'get')
     {
         if ($this->checkPatternIsMatching($this->patterns($route), '/'.request('url'))) {
@@ -18,6 +29,11 @@ class RouteHandler
         }
     }
 
+    /**
+     * @param string $route
+     * @param string $requestUrl
+     * @return bool
+     */
     private function checkPatternIsMatching(string $route, string $requestUrl): bool
     {
          if (preg_match('@^' . $route . '$@', $requestUrl, $params)) {
@@ -30,6 +46,11 @@ class RouteHandler
          return false;
     }
 
+    /**
+     * @param $callback
+     * @param $params
+     * @return mixed|void
+     */
     private function controllerPath($callback, $params)
     {
         $controller = explode('@', $callback);
@@ -42,6 +63,10 @@ class RouteHandler
         }
     }
 
+    /**
+     * @param $class
+     * @return mixed
+     */
     private function addNameSpaceToClass($class)
     {
         $class = 'App\\Http\\Controllers\\' . $class[0];
@@ -49,6 +74,10 @@ class RouteHandler
         return new $class;
     }
 
+    /**
+     * @param $url
+     * @return array|string
+     */
     private function patterns($url): array|string
     {
         $patterns = [

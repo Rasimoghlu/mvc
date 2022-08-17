@@ -3,21 +3,13 @@
 namespace Core\Facades;
 
 use App\Http\Exceptions\MethodNotFoundException;
+use App\Interfaces\SessionInterface;
 use Core\Handlers\SessionHandler;
 
 class Session
 {
-    /**
-     * @var SessionHandler
-     */
-    private SessionHandler $sessionHandler;
-
-    /**
-     *
-     */
-    public function __construct()
+    public function __construct(private readonly SessionInterface $sessionHandler)
     {
-        $this->sessionHandler = new SessionHandler();
     }
 
     /**
@@ -27,7 +19,7 @@ class Session
      */
     public static function __callStatic(string $name, array $arguments)
     {
-        return (new static())->$name(...$arguments);
+        return (new static(new SessionHandler()))->$name(...$arguments);
     }
 
     /**

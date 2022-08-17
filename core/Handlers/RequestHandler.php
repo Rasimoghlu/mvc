@@ -2,7 +2,9 @@
 
 namespace Core\Handlers;
 
-class RequestHandler
+use App\Interfaces\RequestInterface;
+
+class RequestHandler implements RequestInterface
 {
     /**
      * @var string
@@ -120,11 +122,11 @@ class RequestHandler
     }
 
     /**
-     * @param $type
+     * @param array $type
      * @param string $key
      * @return bool
      */
-    public function has($type, string $key)
+    public function has(array $type, string $key)
     {
         return array_key_exists($key, $type);
     }
