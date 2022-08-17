@@ -8,5 +8,6 @@ return [
         App\Providers\SessionServiceProvider::class,
         App\Providers\RequestServiceProvider::class,
         App\Providers\DotEnvServiceProvider::class,
+        App\Providers\RouteServiceProvider::class,
     ]
 ];

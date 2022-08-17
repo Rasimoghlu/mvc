@@ -7,9 +7,6 @@ use Core\Handlers\RouteHandler;
 
 class Router
 {
-    /**
-     * @var RouteHandler
-     */
     private RouteHandler $routeHandler;
 
     /**

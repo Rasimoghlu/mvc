@@ -70,7 +70,7 @@ trait CrudTrait
      */
     public function getLastInsertedRow(int $lastInsertedId): mixed
     {
-        return $this->findByIdQuery($lastInsertedId);
+        return $this->findById($lastInsertedId);
     }
 
     /**

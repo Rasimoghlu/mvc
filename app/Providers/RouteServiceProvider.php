@@ -10,11 +10,11 @@ class RouteServiceProvider extends Provider
      * Application constructor
      */
     public function register(){
-
+        //
     }
 
     public static function boot()
     {
-
+        //
     }
 }

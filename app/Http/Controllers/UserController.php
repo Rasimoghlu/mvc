@@ -3,14 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Core\Facades\Request;
 use Core\Facades\Response;
+use Core\Facades\Session;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::get();
+//        dd(Request::method());
+//        $users = User::findById($id);
 
-        return Response::json($users);
+        return view('users');
+    }
+
+    public function store()
+    {
+        $request = Request::all();
+
+        User::create($request);
     }
 }

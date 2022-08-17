@@ -1,6 +1,18 @@
 <?php
 
+use Core\Facades\Request;
 use Core\Facades\View;
+
+if (!function_exists('request')) {
+    /**
+     * @param $key
+     * @return mixed
+     */
+    function request($key)
+    {
+        return Request::get($key);
+    }
+}
 
 if (!function_exists('getModelName')) {
     /**
@@ -91,6 +103,10 @@ if (!function_exists('clean')) {
     }
 
     if (!function_exists('cleanSql')) {
+        /**
+         * @param $data
+         * @return array
+         */
         function cleanSql($data): array
         {
             $cleanArray = [];

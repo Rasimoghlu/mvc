@@ -2,10 +2,7 @@
 
 use Core\Facades\Router;
 
-Router::get('test', function () {
 
-});
+Router::run('/test', 'UserController@index', 'get');
 
-Router::get('/', function () {
-    echo 'salam';
-});
+Router::run('/test/store', 'UserController@store', 'post');

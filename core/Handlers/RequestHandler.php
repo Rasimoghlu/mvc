@@ -32,7 +32,9 @@ class RequestHandler
     /**
      *
      */
-    public function __construct(){}
+    public function __construct()
+    {
+    }
 
     /**
      * @return void
@@ -53,7 +55,7 @@ class RequestHandler
         $host = $_SERVER['HTTP_HOST'];
         $scriptName = $this->scriptName;
 
-       return $this->baseUrl = $protocol . $host . $scriptName;
+        return $this->baseUrl = $protocol . $host . $scriptName;
     }
 
     /**
@@ -136,7 +138,7 @@ class RequestHandler
     {
         $type = $type ?? $_REQUEST;
 
-        return static::has($type, $key) ? $type[$key] : null;
+        return $this->has($type, $key) ? $type[$key] : null;
     }
 
     /**
@@ -176,7 +178,13 @@ class RequestHandler
      */
     public function all()
     {
+        if ($_REQUEST['url']) {
+            unset($_REQUEST['url']);
+
+            return $_REQUEST;
+        }
+
         return $_REQUEST;
     }
-    
+
 }
