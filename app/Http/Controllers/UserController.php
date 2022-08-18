@@ -7,6 +7,7 @@ use Core\Facades\Auth;
 use Core\Facades\Request;
 use Core\Facades\Response;
 use Core\Facades\Session;
+use Core\Facades\Validation;
 
 class UserController extends Controller
 {
@@ -26,6 +27,13 @@ class UserController extends Controller
     {
         $request = Request::all();
 
-        User::create($request);
+        $rules = Validation::make($request, [
+            'name' => 'required',
+            'email' => 'email',
+            'password' => 'required'
+        ]);
+    dd($rules);
+
+//        User::create($request);
     }
 }
