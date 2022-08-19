@@ -7,10 +7,6 @@ use Bootstrap\Provider;
 
 class AppServiceProvider extends Provider
 {
-    public function register(){
-
-    }
-
     public static function boot()
     {
         Whoops::handle();

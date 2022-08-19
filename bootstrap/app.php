@@ -4,10 +4,6 @@ namespace Bootstrap;
 
 class Provider
 {
-    public function register(){
-
-    }
-
     public static function run()
     {
         self::getProviders();

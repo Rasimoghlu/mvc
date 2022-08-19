@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Core\Facades\Request;
-use Core\Facades\Session;
 use Core\Facades\Validation;
 
 class UserController extends Controller
