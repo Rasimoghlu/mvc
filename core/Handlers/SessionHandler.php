@@ -108,6 +108,7 @@ class SessionHandler implements SessionInterface
     {
         if ($this->has($key)) {
             unset($_SESSION[$key]);
+            session_destroy();
         }
     }
 

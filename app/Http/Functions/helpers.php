@@ -1,6 +1,7 @@
 <?php
 
 use Core\Facades\Request;
+use Core\Facades\Session;
 use Core\Facades\View;
 
 if (!function_exists('request')) {
@@ -11,6 +12,23 @@ if (!function_exists('request')) {
     function request($key)
     {
         return Request::get($key);
+    }
+}
+
+if (!function_exists('error')) {
+    /**
+     * @param $key
+     * @return mixed|null
+     */
+    function error($key)
+    {
+        if (isset($_SESSION['errors'][$key])) {
+
+            echo $_SESSION['errors'][$key];
+            unset($_SESSION['errors'][$key]);
+        }
+
+        return null;
     }
 }
 
@@ -113,8 +131,7 @@ if (!function_exists('clean')) {
 
             if (is_array($data)) {
                 foreach ($data as $value) {
-                    if (isset($_POST[$value]) or isset($_GET[$value]) or count($data))
-                    {
+                    if (isset($_POST[$value]) or isset($_GET[$value]) or count($data)) {
                         $clean = !empty($_POST[$value]) ? trim($_POST[$value]) : (!empty($_GET[$value]) ? trim($_GET[$value]) : $value);
                         $clean = strip_tags($clean);
                         $clean = htmlspecialchars($clean, ENT_QUOTES);
@@ -138,7 +155,7 @@ if (!function_exists('clean')) {
                 }
             }
 
-        return $cleanArray;
+            return $cleanArray;
         }
     }
 

@@ -34,4 +34,5 @@ interface SessionInterface
      * @return mixed
      */
     public function remove(string $key);
+
 }

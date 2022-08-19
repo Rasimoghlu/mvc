@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Core\Facades\Auth;
 use Core\Facades\Request;
-use Core\Facades\Response;
 use Core\Facades\Session;
 use Core\Facades\Validation;
 
@@ -13,14 +11,9 @@ class UserController extends Controller
 {
     public function index()
     {
-//        Auth::login([
-//            'email' => 'test@gmail.com2',
-//            'password' => 'password'
-//        ]);
+        $users = User::get();
 
-//        $users = User::findById($id);
-
-        return view('users');
+        return view('users', compact('users'));
     }
 
     public function store()
@@ -28,12 +21,11 @@ class UserController extends Controller
         $request = Request::all();
 
         $rules = Validation::make($request, [
-            'name' => 'required',
+            'name' => 'string|required',
             'email' => 'email',
-            'password' => 'required'
+            'password' => 'string|required'
         ]);
-    dd($rules);
 
-//        User::create($request);
+        User::create($rules);
     }
 }

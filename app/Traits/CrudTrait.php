@@ -10,7 +10,7 @@ trait CrudTrait
      */
     public function create(array $data): mixed
     {
-         cleanSql($data);
+        cleanSql($data);
 
         $keys = $this->getArrayKeysFromRequestForCreate($data);
 
