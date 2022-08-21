@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Bootstrap\Provider;
-use Core\Facades\Request;
+use Src\Facades\Request;
 
 class RequestServiceProvider extends Provider
 {

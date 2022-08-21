@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Core\Facades\Model;
+use Src\Facades\Model;
 
 class Post extends Model
 {

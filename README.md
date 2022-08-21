@@ -12,7 +12,7 @@ When you created model you have to override table property.
 
 namespace App\Models;
 
-use Core\Facades\Model;
+use Src\Facades\Model;
 
 class User extends Model
 {
@@ -44,13 +44,13 @@ class UserController extends Controller
 
 ```php
 # GET route. (if you are not passing method name, it will be by default GET)
-\Core\Facades\Route::run('/user', 'UserController@index', 'get');
+\Src\Facades\Route::run('/user', 'UserController@index', 'get');
 
 # Post route.
-\Core\Facades\Route::run('/user/store', 'UserController@store', 'post');
+\Src\Facades\Route::run('/user/store', 'UserController@store', 'post');
 
 # Using callback
-\Core\Facades\Route::run('/user', function () {
+\Src\Facades\Route::run('/user', function () {
     echo 'Hello World!.';
 })
 ```
@@ -58,16 +58,16 @@ class UserController extends Controller
 ## HTTP Request
 ```php
 # Get all requests.
-\Core\Facades\Request::all();
+\Src\Facades\Request::all();
 
 # Get request method.
-\Core\Facades\Request::method();
+\Src\Facades\Request::method();
 
 # Get get method by key.
-\Core\Facades\Request::get('key');
+\Src\Facades\Request::get('key');
 
 # Get pos method by key.
-\Core\Facades\Request::post('key');
+\Src\Facades\Request::post('key');
 ```
 
 ## Validation
@@ -91,16 +91,16 @@ class UserController extends Controller
 ## Session
 ```php
 # Get Session by key.
-\Core\Facades\Session::get('key');
+\Src\Facades\Session::get('key');
 
 # Set Session.
-\Core\Facades\Session::set('key', ['data' => 'test']);
+\Src\Facades\Session::set('key', ['data' => 'test']);
 
 # Remove Session by key.
-\Core\Facades\Session::remove('key');
+\Src\Facades\Session::remove('key');
 
 # Clear all sessions.
-\Core\Facades\Session::clear();
+\Src\Facades\Session::clear();
 ```
 
 ## Service Provider
@@ -114,7 +114,7 @@ Service Provider example.
 namespace App\Providers;
 
 use Bootstrap\Provider;
-use Core\Facades\Session;
+use Src\Facades\Session;
 
 class SessionServiceProvider extends Provider
 {

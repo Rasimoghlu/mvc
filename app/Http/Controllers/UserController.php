@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Core\Facades\Request;
-use Core\Facades\Validation;
+use Src\Facades\Request;
+use Src\Facades\Validation;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::get();
+        $users = User::paginate();
 
         return view('users', compact('users'));
     }

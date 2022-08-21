@@ -12,7 +12,7 @@
 
 <div class="container">
     <form action="<?= $_SERVER['APP_URL'] . '/test/store'; ?>" method="post">
-
+        <input type="hidden" name="_token" value="<?= _token(); ?>">
         <div class="form-group col-md-3 mb-3">
             <label for="name">Name</label>
             <input type="text" class="form-control" name="name" id="name" placeholder="Enter name">

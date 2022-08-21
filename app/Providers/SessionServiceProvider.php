@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Bootstrap\Provider;
-use Core\Facades\Session;
+use Src\Facades\Session;
 
 class SessionServiceProvider extends Provider
 {

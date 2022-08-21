@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Handlers;
+namespace Src\Handlers;
 
 use App\Interfaces\BuilderInterface;
 use App\Traits\BuilderTrait;

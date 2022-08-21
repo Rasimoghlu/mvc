@@ -1,9 +1,9 @@
 <?php
 
-namespace Core\Handlers;
+namespace Src\Handlers;
 
 use App\Interfaces\ValidationInterface;
-use Core\Facades\Session;
+use Src\Facades\Session;
 
 class ValidationHandler implements ValidationInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-use Core\Facades\Router;
+use Src\Facades\Router;
 
 Router::run('/test', 'UserController@index', 'get');
 

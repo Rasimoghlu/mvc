@@ -1,18 +1,19 @@
 <?php
 
-namespace Core\Facades;
+namespace Src;
 
 use App\Http\Exceptions\MethodNotFoundException;
-use App\Interfaces\ResponseInterface;
-use Core\Handlers\ResponseHandler;
 
-class Response
+class Facade
 {
+    private $handler;
+
     /**
-     * @param ResponseInterface $responseHandler
+     *
      */
-    public function __construct(private readonly ResponseInterface $responseHandler)
+    public function __construct()
     {
+        $this->handler = $this->getFacadeAccessor();
     }
 
     /**
@@ -22,7 +23,7 @@ class Response
      */
     public static function __callStatic(string $name, array $arguments)
     {
-        return (new static(new ResponseHandler()))->$name(...$arguments);
+        return (new static())->$name(...$arguments);
     }
 
     /**
@@ -30,11 +31,16 @@ class Response
      */
     public function __call(string $name, array $arguments)
     {
-        if (method_exists($this->responseHandler, $name)) {
-            return $this->responseHandler->$name(...$arguments);
+        if (method_exists($this->handler, $name)) {
+            return $this->handler->$name(...$arguments);
         }
 
         throw new MethodNotFoundException();
+    }
+
+    protected static function getFacadeAccessor()
+    {
+       return self::class;
     }
 
 }

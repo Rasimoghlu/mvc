@@ -1,10 +1,10 @@
 <?php
 
-namespace Core\Handlers;
+namespace Src\Handlers;
 
 use App\Interfaces\AuthInterface;
 use App\Models\User;
-use Core\Facades\Session;
+use Src\Facades\Session;
 
 class AuthHandler implements AuthInterface
 {

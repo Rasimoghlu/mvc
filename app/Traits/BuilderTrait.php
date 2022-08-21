@@ -2,8 +2,9 @@
 
 namespace App\Traits;
 
-use Core\DatabaseConnection;
-use Core\Facades\Request;
+use Src\DatabaseConnection;
+use Src\Facades\Model;
+use Src\Facades\Request;
 
 trait BuilderTrait
 {
@@ -126,11 +127,11 @@ trait BuilderTrait
     public function select(array $fields, array $tables = []): static
     {
         if (count($tables)) {
-            $tables = [$this->getClassName(), implode(', ', $tables)];
+            $tables = [$this->table, implode(', ', $tables)];
         }
 
         if (empty($tables)) {
-            $tables = explode(', ', $this->getClassName());
+            $tables = explode(', ', $this->table);
         }
 
         $this->select = "SELECT " . implode(', ', $fields) . ' FROM ' . implode(', ', $tables);
@@ -383,7 +384,7 @@ trait BuilderTrait
      */
     public function findById(int $id): mixed
     {
-        $table = $this->getClassName();
+        $table = $this->table;
 
         $sql = "SELECT * FROM $table WHERE id = ?";
 
@@ -593,7 +594,7 @@ trait BuilderTrait
      */
     public function getAllDataWithOutConditions(): string
     {
-        return "SELECT * FROM " . $this->getClassName();
+        return "SELECT * FROM " . $this->table;
     }
 
     /**
@@ -651,14 +652,6 @@ trait BuilderTrait
         $statement->execute(array_values(arrayFlatten($this->params)));
 
         return $statement->rowCount();
-    }
-
-    /**
-     * @return string
-     */
-    public function getClassName(): string
-    {
-        return $this->table ?? get_class($this);
     }
 
 }

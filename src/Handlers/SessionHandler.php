@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Handlers;
+namespace Src\Handlers;
 
 use App\Interfaces\SessionInterface;
 
@@ -110,6 +110,13 @@ class SessionHandler implements SessionInterface
             unset($_SESSION[$key]);
             session_destroy();
         }
+    }
+
+    public function token()
+    {
+        $this->set('_token', md5(rand(0000, 9999)));
+
+        return $this->get('_token');
     }
 
 }

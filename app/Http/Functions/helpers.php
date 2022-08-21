@@ -1,8 +1,8 @@
 <?php
 
-use Core\Facades\Request;
-use Core\Facades\Session;
-use Core\Facades\View;
+use Src\Facades\Request;
+use Src\Facades\Session;
+use Src\Facades\View;
 
 if (!function_exists('request')) {
     /**
@@ -101,6 +101,52 @@ if (!function_exists('dd')) {
     function dd($data)
     {
         dump($data);
+    }
+}
+
+if (!function_exists('_token')) {
+    /**
+     * @return mixed
+     */
+    function _token()
+    {
+        return Session::token();
+    }
+}
+
+if (! function_exists('class_basename')) {
+    /**
+     * Get the class "basename" of the given object / class.
+     *
+     * @param  string|object  $class
+     * @return string
+     */
+    function class_basename($class)
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+
+        return basename(str_replace('\\', '/', $class));
+    }
+}
+
+if (!function_exists('snake')) {
+    /**
+     * @param $input
+     * @return string
+     */
+    function snake($input) {
+
+        $pattern = '!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!';
+        preg_match_all($pattern, $input, $matches);
+        $ret = $matches[0];
+
+        foreach ($ret as &$match) {
+            $match = $match == strtoupper($match) ?
+                strtolower($match) :
+                lcfirst($match);
+        }
+
+        return implode('_', $ret);
     }
 }
 

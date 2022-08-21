@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Handlers;
+namespace Src\Handlers;
 
 use App\Interfaces\RequestInterface;
 
@@ -36,6 +36,16 @@ class RequestHandler implements RequestInterface
      */
     public function __construct()
     {
+        $this->checkCsrfToken();
+    }
+
+    private function checkCsrfToken()
+    {
+        if (strtolower($_SERVER['REQUEST_METHOD']) === 'post') {
+            if (!isset($_POST['_token']) || $_SESSION['_token'] !== $_POST['_token']) {
+                die('Invalid CSRF Token.!');
+            }
+        }
     }
 
     /**
@@ -180,8 +190,9 @@ class RequestHandler implements RequestInterface
      */
     public function all()
     {
-        if ($_REQUEST['url']) {
+        if ($_REQUEST['url'] || $_REQUEST['_token']) {
             unset($_REQUEST['url']);
+            unset($_REQUEST['_token']);
 
             return $_REQUEST;
         }
