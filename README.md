@@ -270,7 +270,36 @@ if (Session::has('errors')) {
         ]);
 ```
 
+## CSRF protection
+```php
+# Just add hidden input to your form and call _token() helper.
 
+<div class="container">
+    <form action="<?= $_SERVER['APP_URL'] . '/test/store'; ?>" method="post">
+        <input type="hidden" name="_token" value="<?= _token(); ?>">
+        <div class="form-group col-md-3 mb-3">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" name="name" id="name" placeholder="Enter name">
+            <?= error('name')?>
+        </div>
+
+        <div class="form-group col-md-3 mb-3">
+            <label for="email">Email address</label>
+            <input type="email" class="form-control" name="email" id="email" placeholder="Enter email">
+            <?= error('email')?>
+        </div>
+
+        <div class="form-group col-md-3 mb-3">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" name="password" id="password" placeholder="Password">
+            <?= error('password')?>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+</div>
+
+```
 
 ## Upcoming features
 New validation keywords and COOKIE class.
