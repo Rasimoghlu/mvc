@@ -63,9 +63,12 @@ class RequestHandler implements RequestInterface
      */
     public function setBaseUrl()
     {
-        $protocol = $_SERVER['REQUEST_SCHEME'] . '://';
-        $host = $_SERVER['HTTP_HOST'];
-        $scriptName = $this->scriptName;
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
+        $protocol = $isSecure ? 'https://' : 'http://';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $scriptName = $this->scriptName ?? '';
 
         return $this->baseUrl = $protocol . $host . $scriptName;
     }
@@ -190,11 +193,8 @@ class RequestHandler implements RequestInterface
      */
     public function all()
     {
-        if ($_REQUEST['url'] || $_REQUEST['_token']) {
-            unset($_REQUEST['url']);
-            unset($_REQUEST['_token']);
-
-            return $_REQUEST;
+        if (isset($_REQUEST['url']) || isset($_REQUEST['_token'])) {
+            unset($_REQUEST['url'], $_REQUEST['_token']);
         }
 
         return $_REQUEST;
