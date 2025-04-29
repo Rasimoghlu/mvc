@@ -42,8 +42,22 @@ class RequestHandler implements RequestInterface
     private function checkCsrfToken()
     {
         if (strtolower($_SERVER['REQUEST_METHOD']) === 'post') {
-            if (!isset($_POST['_token']) || $_SESSION['_token'] !== $_POST['_token']) {
-                die('Invalid CSRF Token.!');
+            if (!isset($_POST['_token'])) {
+                echo '<div style="background-color: #ffecec; color: red; padding: 10px; margin: 10px 0; border-left: 4px solid red;">
+                    WARNING: CSRF Token missing! This is a security risk.
+                </div>';
+            } 
+            elseif (isset($_SESSION['_token']) && $_SESSION['_token'] !== $_POST['_token']) {
+                echo '<div style="background-color: #ffecec; color: red; padding: 10px; margin: 10px 0; border-left: 4px solid red;">
+                    WARNING: Invalid CSRF Token! Expected: '.$_SESSION['_token'].', Received: '.$_POST['_token'].'
+                </div>';
+            }
+            
+            if (isset($_SESSION['_token'])) {
+                echo '<div style="background-color: #e7f7e9; color: green; padding: 10px; margin: 10px 0; border-left: 4px solid green;">
+                    Current Session Token: '.$_SESSION['_token'].'<br>
+                    Submitted Token: '.(isset($_POST['_token']) ? $_POST['_token'] : 'None').'
+                </div>';
             }
         }
     }

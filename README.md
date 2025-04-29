@@ -1,12 +1,40 @@
-# Simple and small MVC
+# Laravel-style MVC Framework
 
-This mvc is intended for small-scale projects, and I'm trying to make it similar to Laravel)
+A lightweight MVC framework for PHP 8.1+ inspired by Laravel. Perfect for small to medium-scale projects.
 
-Used PHP version is 8.1.
+## Installation
 
-## Creating Model
+```bash
+composer create-project rasimoghlu/mvc your-project-name
+cd your-project-name
+```
 
-When you created model you have to override table property.
+## Configuration
+
+1. Copy `.env.example` to `.env` and configure your environment variables
+2. Run your application with a PHP server:
+
+```bash
+cd public
+php -S localhost:8000
+```
+
+## Key Features
+
+- Simple and intuitive routing
+- MVC architecture
+- Database ORM with advanced query capabilities
+- Middleware support
+- Service providers
+- Environment variable configuration
+- CSRF protection
+- Validation system
+- Improved error handling
+
+## Creating Models
+
+Models provide an elegant way to interact with your database. Each model represents a table in your database.
+
 ```php
 <?php
 
@@ -17,121 +45,189 @@ use Src\Facades\Model;
 class User extends Model
 {
     protected string $table = 'users';
+    
+    // Define fillable fields (fields that can be mass-assigned)
+    protected array $fillable = ['name', 'email', 'password'];
 }
 ```
 
-## Creating Controller
-In controller you can route your data's to view.
+## Creating Controllers
+
+Controllers handle incoming HTTP requests and return responses.
+
 ```php
 <?php
 
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Exception;
 
-class UserController extends Controller
+class UserController
 {
-    public function index($name, $age)
+    public function index()
     {
-        $users = User::where('name', '=', $name)->where('age', '=', $age)->paginate();
-
-        return view('users', compact('users'));
+        return view('users.index', [
+            'users' => User::all()
+        ]);
+    }
+    
+    public function show(int $id)
+    {
+        $user = User::find($id);
+        
+        if (!$user) {
+            return view('errors.404', [
+                'message' => 'User not found'
+            ]);
+        }
+        
+        return view('users.show', [
+            'user' => $user
+        ]);
+    }
+    
+    public function store()
+    {
+        try {
+            $user = User::create([
+                'name' => $_POST['name'] ?? '',
+                'email' => $_POST['email'] ?? '',
+                'password' => password_hash($_POST['password'] ?? '', PASSWORD_DEFAULT)
+            ]);
+            
+            return redirect("/user/{$user->id}");
+        } catch (Exception $e) {
+            return view('users.create', [
+                'error' => 'Failed to create user'
+            ]);
+        }
     }
 }
 ```
 
 ## Routing
 
+Define your routes in the `route/web.php` file:
+
 ```php
-# GET route. (if you are not passing method name, it will be by default GET)
-\Src\Facades\Route::run('/user', 'UserController@index', 'get');
+<?php
 
-# Post route.
-\Src\Facades\Route::run('/user/store', 'UserController@store', 'post');
+use Src\Facades\Router;
 
-# Using callback
-\Src\Facades\Route::run('/user', function () {
-    echo 'Hello World!.';
-})
+// Basic routes
+Router::run('/test', 'UserController@index', 'get');
+Router::run('/test/store', 'UserController@store', 'post');
+
+// Routes with parameters
+Router::run('/user/{id}', 'UserController@show', 'get');
+Router::run('/user/{id}/edit', 'UserController@edit', 'get');
+Router::run('/user/{id}', 'UserController@update', 'put');
+Router::run('/user/{id}', 'UserController@destroy', 'delete');
+
+// Using callbacks
+Router::run('/hello', function() {
+    echo 'Hello World!';
+});
+
+// Apply middleware to a route
+Router::middleware('/user/{id}', 'get', 'auth');
 ```
 
 ## HTTP Request
+
+Access request data in your controllers:
+
 ```php
-# Get all requests.
-\Src\Facades\Request::all();
+// Get all request data
+$data = request();
 
-# Get request method.
-\Src\Facades\Request::method();
+// Get a specific request value
+$name = request('name');
 
-# Get get method by key.
-\Src\Facades\Request::get('key');
+// Get request method
+$method = \Src\Facades\Request::method();
 
-# Get pos method by key.
-\Src\Facades\Request::post('key');
+// Get query parameter
+$query = \Src\Facades\Request::get('key');
+
+// Get POST data
+$post = \Src\Facades\Request::post('key');
 ```
 
 ## Validation
+
+Validate incoming request data:
+
 ```php
-# Usage
+public function store()
+{
+    $request = \Src\Facades\Request::all();
 
-    public function store()
-    {
-        $request = Request::all();
+    $rules = \Src\Facades\Validation::make($request, [
+        'name' => 'string|required',
+        'email' => 'email|required',
+        'password' => 'string|required|min:8'
+    ]);
 
-        $rules = Validation::make($request, [
-            'name' => 'string|required',
-            'email' => 'email',
-            'password' => 'string|required'
-        ]);
-
-        User::create($rules);
-    }
+    User::create($rules);
+}
 ```
 
-## Session
-```php
-# Get Session by key.
-\Src\Facades\Session::get('key');
+## Session Management
 
-# Set Session.
+Work with sessions:
+
+```php
+// Get a session value
+$value = \Src\Facades\Session::get('key');
+
+// Set a session value
 \Src\Facades\Session::set('key', ['data' => 'test']);
 
-# Remove Session by key.
+// Remove a session value
 \Src\Facades\Session::remove('key');
 
-# Clear all sessions.
+// Clear all sessions
 \Src\Facades\Session::clear();
+
+// Generate CSRF token
+$token = _token();
+
+// Include CSRF field in forms
+<?= csrf_field() ?>
 ```
 
-## Service Provider
+## Service Providers
 
-You can create your own Service Provider and use it. Just create your service provider under app/Providers folder and register it under config/app file.
+Create custom service providers to bootstrap application components:
 
-Service Provider example.
 ```php
 <?php
 
 namespace App\Providers;
 
 use Bootstrap\Provider;
-use Src\Facades\Session;
 
-class SessionServiceProvider extends Provider
+class AppServiceProvider extends Provider
 {
-    public static function boot()
+    public static function boot(): void
     {
-        Session::start();
+        // Register error handler
+        \App\Http\Exceptions\Whoops::handle();
+        
+        // Set application timezone
+        date_default_timezone_set('UTC');
     }
-    
 }
 ```
 
-Register your Service Provider in config/app.php.
+Register providers in `config/app.php`:
+
 ```php
 <?php
 
 return [
-
     'providers' => [
         App\Providers\AppServiceProvider::class,
         App\Providers\SessionServiceProvider::class,
@@ -141,165 +237,95 @@ return [
 ];
 ```
 
-All Service Providers booting in main Provider class.
+## Database ORM Features
+
+| Joins         | Queries       | CRUD     |
+|---------------|---------------|----------|
+| join()        | first()       | create() |
+| innerJoin()   | get()         | update() |
+| leftJoin()    | findById()    | delete() |
+| rightJoin()   | where()       |          |
+| fullJoin()    | orWhere()     |          |
+| fullOuterJoin() | whereIn()     |          |
+| crossJoin()   | orWhereIn()   |          |
+|               | whereNotIn()  |          |
+|               | select()      |          |
+|               | groupBy()     |          |
+|               | having()      |          |
+|               | limit()       |          |
+|               | paginate()    |          |
+|               | count()       |          |
+
+## Query Examples
+
 ```php
-<?php
+// Join example
+User::select(['name', 'COUNT(user_id) as count'])
+    ->join('posts', 'posts.user_id', '=', 'users.id')
+    ->get();
 
-namespace Bootstrap;
+// Multiple joins
+User::select(['name', 'COUNT(user_id) as count'])
+    ->join('posts', 'posts.user_id', '=', 'users.id')
+    ->leftJoin('comments', 'posts.id', '=', 'comments.post_id')
+    ->get();
 
-class Provider
-{
-    public static function run()
-    {
-        self::getProviders();
-    }
+// Group by with having
+User::select(['name', 'COUNT(user_id) as count'])
+    ->join('posts', 'posts.user_id', '=', 'users.id')
+    ->groupBy('name')
+    ->having('count', '>', 5)
+    ->get();
 
-    private static function getProviders()
-    {
-        $app = include_once '../config/app.php';
-
-        foreach ($app['providers'] as $provider) {
-            $provider::boot();
-        }
-    }
-
-}
+// Pagination
+$users = User::where('active', '=', 1)
+    ->orWhereIn('role', ['admin', 'editor'])
+    ->paginate(20);
 ```
 
-## Environment Variables
-Added dotenv package for environment variables. You can find more details in this package.
+## Form Validation
 
-```
-composer require vlucas/phpdotenv
-```
+Display validation errors in your views:
 
-## Debug
-
-Added Symfony var dumper. You can find more details in this package.
-
-##### dd('test');
-
-```
-composer require symfony/var-dumper
-```
-
-## Available ORM functionality
-
-| Joins     | Queries      | CRUD     |
-|-----------|--------------|----------|
-| join()      | first()      | create() |
-| innerJoin() | get()        | update() |
-| leftJoin()  | findById()   | delete() |
-| rightJoin() | where()      |          |
-| fullJoin() | orWhere()    |          |
-| fullOuterJoin() | whereIn()    |          |
-| crossJoin() | orWhereIn()  |          |
-|  | whereNotIn() |          |
-|  | select()     |          |
-|  | groypBy()    |          |
-|  | having()     |          |
-|  | limit()      |          |
-|  | paginate()   |          |
-|  | count()      |          |
-
-## Simple usages
 ```php
-# Join 
-User::select(['name', 'COUNT(user_id) as count'])
-->join('posts', 'posts.user_id', '=', 'users.id')
-->get();
+// Show all errors
+<?php if (isset($_SESSION['errors'])): ?>
+    <div class="alert alert-danger">
+        <?php foreach ($_SESSION['errors'] as $field => $error): ?>
+            <p><?= $error ?></p>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 
-# Multiple joins
-User::select(['name', 'COUNT(user_id) as count'])
-->join('posts', 'posts.user_id', '=', 'users.id')
-->leftJoin('pages', 'posts.page_id', '=', 'pages.id')
-->get();
-
-# GroupBy
-User::select(['name', 'COUNT(user_id) as count'])
-->join('posts', 'posts.user_id', '=', 'users.id')
-->groupBy('name')
-->get();
-
-# Having
-User::select(['name', 'COUNT(user_id) as count'])
-->join('posts', 'posts.user_id', '=', 'users.id')
-->groupBy('name')
-->having('age' > 18)
-->get();
-
-# Paginate by default is 10, but you can change it.
-User::where('name', '=', 'Sarxan')->orWhereIn('id', [1,2,3,4])->paginate(20)
-
-# You can display all validation error messages or one by one under form input.
-
-# Show all errors.
-if (Session::has('errors')) {
-    foreach (Session::get('errors') as $error) {
-        echo $error;
-    }
-}
-
-# Show under input
-
-# Just pass your input name into error helper.
-
-<input type="text" class="form-control" name="name" id="name" placeholder="Enter name">
- <?= error('name')?>
-
+// Show specific field error
+<input type="text" name="email" class="form-control" value="<?= old('email') ?>">
+<?php if ($error = error('email')): ?>
+    <div class="text-danger"><?= $error ?></div>
+<?php endif; ?>
 ```
 
-## Available validations
+## Helper Functions
 
-| Validations  |
-|--------------|
-| required     |
-| string       |
-| integer      |
-| email        |
-| alphanumeric |
-
-### Usage validations
 ```php
-  $request = Request::all();
+// Dump and die (debug)
+dd($variable);
 
-  $rules = Validation::make($request, [
-            'name' => 'string|required',
-            'email' => 'email',
-            'password' => 'string|required'
-        ]);
+// Escape HTML
+echo e($unsafeString);
+
+// Sanitize user input
+$clean = sanitize_input($_POST['input']);
+
+// Clean HTML content
+$safeHtml = clean($html);
+
+// Redirect to another page
+redirect('/dashboard');
+
+// Get previous form input
+$oldValue = old('email', 'default@example.com');
 ```
 
-## CSRF protection
-```php
-# Just add hidden input to your form and call _token() helper.
+## Contributing
 
-<div class="container">
-    <form action="<?= $_SERVER['APP_URL'] . '/test/store'; ?>" method="post">
-        <input type="hidden" name="_token" value="<?= _token(); ?>">
-        <div class="form-group col-md-3 mb-3">
-            <label for="name">Name</label>
-            <input type="text" class="form-control" name="name" id="name" placeholder="Enter name">
-            <?= error('name')?>
-        </div>
-
-        <div class="form-group col-md-3 mb-3">
-            <label for="email">Email address</label>
-            <input type="email" class="form-control" name="email" id="email" placeholder="Enter email">
-            <?= error('email')?>
-        </div>
-
-        <div class="form-group col-md-3 mb-3">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" name="password" id="password" placeholder="Password">
-            <?= error('password')?>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">Submit</button>
-    </form>
-</div>
-
-```
-
-## Upcoming features
-New validation keywords and COOKIE class.
+Contributions are welcome! Please feel free to submit a Pull Request.

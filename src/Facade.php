@@ -2,9 +2,15 @@
 
 namespace Src;
 
+use Exception;
 use App\Http\Exceptions\MethodNotFoundException;
 
-class Facade
+/**
+ * Base Facade class
+ * 
+ * Provides a static interface to non-static methods of a class
+ */
+abstract class Facade
 {
     private $handler;
 
@@ -17,13 +23,33 @@ class Facade
     }
 
     /**
-     * @param string $name
-     * @param array $arguments
+     * Get the registered name of the component
+     *
      * @return mixed
      */
-    public static function __callStatic(string $name, array $arguments)
+    abstract protected static function getFacadeAccessor();
+
+    /**
+     * Handle dynamic, static calls to the object
+     *
+     * @param string $method
+     * @param array $args
+     * @return mixed
+     * @throws Exception
+     */
+    public static function __callStatic(string $method, array $args)
     {
-        return (new static())->$name(...$arguments);
+        $instance = static::getFacadeAccessor();
+
+        if (!$instance) {
+            throw new Exception('A facade root has not been set.');
+        }
+
+        if (!method_exists($instance, $method)) {
+            throw new Exception("Method {$method} does not exist on " . get_class($instance));
+        }
+
+        return $instance->$method(...$args);
     }
 
     /**
@@ -37,10 +63,4 @@ class Facade
 
         throw new MethodNotFoundException();
     }
-
-    protected static function getFacadeAccessor()
-    {
-       return self::class;
-    }
-
 }

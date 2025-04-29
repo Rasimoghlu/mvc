@@ -112,11 +112,23 @@ class SessionHandler implements SessionInterface
         }
     }
 
-    public function token()
+    /**
+     * Create or return existing CSRF token
+     * 
+     * @return string
+     */
+    public function token(): string
     {
-        $this->set('_token', md5(rand(0000, 9999)));
-
-        return $this->get('_token');
+        // If a token already exists, return it
+        if ($this->has('_token')) {
+            return $this->get('_token');
+        }
+        
+        // If no token exists, create a new one
+        $token = bin2hex(random_bytes(32)); // Create a more secure token
+        $this->set('_token', $token);
+        
+        return $token;
     }
 
 }

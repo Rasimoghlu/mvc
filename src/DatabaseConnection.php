@@ -8,7 +8,7 @@ use PDOException;
 
 class DatabaseConnection
 {
-    protected static $instannce;
+    protected static $instance;
     protected $connect;
 
     /**
@@ -29,7 +29,7 @@ class DatabaseConnection
     private string $name;
 
     /**
-     *
+     * Private constructor for singleton pattern
      */
     private function __construct()
     {
@@ -104,18 +104,27 @@ class DatabaseConnection
         throw new Exception("Can't serialize a singleton");
     }
 
+    /**
+     * Returns the singleton instance
+     *
+     * @return DatabaseConnection
+     */
     public static function getInstance(): DatabaseConnection
     {
-        if (is_null(self::$instannce)) {
-            self::$instannce = new DatabaseConnection;
+        if (is_null(self::$instance)) {
+            self::$instance = new DatabaseConnection;
         }
 
-        return self::$instannce;
+        return self::$instance;
     }
 
+    /**
+     * Returns the PDO connection
+     *
+     * @return PDO
+     */
     public function connect()
     {
         return $this->connect;
     }
-
 }

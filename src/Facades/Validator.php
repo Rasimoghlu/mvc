@@ -5,10 +5,20 @@ namespace Src\Facades;
 use Src\Facade;
 use Src\Handlers\ValidationHandler;
 
-class Validation extends Facade
+/**
+ * Validator Facade
+ * 
+ * Provides access to the ValidationHandler
+ */
+class Validator extends Facade
 {
+    /**
+     * Get the facade accessor
+     * 
+     * @return ValidationHandler
+     */
     protected static function getFacadeAccessor(): ValidationHandler
     {
         return new ValidationHandler();
     }
-}
+} 
