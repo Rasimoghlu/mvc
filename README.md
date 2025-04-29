@@ -30,6 +30,8 @@ php -S localhost:8000
 - CSRF protection
 - Validation system
 - Improved error handling
+- Automatic handling of timestamps with graceful fallback
+- Safe database operations with optional fields
 
 ## Creating Models
 
@@ -46,10 +48,18 @@ class User extends Model
 {
     protected string $table = 'users';
     
+    // Optional: Override timestamp settings
+    protected bool $timestamps = true;
+    protected string $createdField = 'created_at';
+    protected string $updatedField = 'updated_at';
+    
     // Define fillable fields (fields that can be mass-assigned)
     protected array $fillable = ['name', 'email', 'password'];
 }
 ```
+
+### Timestamps
+The framework automatically handles timestamps (`created_at` and `updated_at`) if they exist in your database tables. If the columns don't exist, the framework will continue without error.
 
 ## Creating Controllers
 
@@ -61,50 +71,196 @@ Controllers handle incoming HTTP requests and return responses.
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
 use Exception;
 
-class UserController
+class UserController extends Controller
 {
+    protected User $user;
+    
+    public function __construct()
+    {
+        $this->user = new User();
+    }
+    
     public function index()
     {
-        return view('users.index', [
-            'users' => User::all()
-        ]);
+        $users = $this->user->all();
+        return $this->view('users/index', compact('users'));
     }
     
     public function show(int $id)
     {
-        $user = User::find($id);
-        
-        if (!$user) {
-            return view('errors.404', [
+        try {
+            $user = User::findOrFail($id);
+            return view('users/show', [
+                'user' => $user
+            ]);
+        } catch (Exception $e) {
+            return view('errors/404', [
                 'message' => 'User not found'
             ]);
         }
-        
-        return view('users.show', [
-            'user' => $user
-        ]);
     }
     
     public function store()
     {
         try {
-            $user = User::create([
-                'name' => $_POST['name'] ?? '',
-                'email' => $_POST['email'] ?? '',
-                'password' => password_hash($_POST['password'] ?? '', PASSWORD_DEFAULT)
-            ]);
+            $request = new UserStoreRequest();
             
-            return redirect("/user/{$user->id}");
+            if (!$request->validate()) {
+                return $request->failedValidation();
+            }
+            
+            $data = $request->validated();
+            
+            // Hash password if provided
+            if (isset($data['password'])) {
+                $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            }
+            
+            $user = $this->user->create($data);
+            
+            if ($user) {
+                return $this->withSuccess('User created successfully')
+                    ->redirect('/users');
+            }
+            
+            return $this->withError('Failed to create user')
+                ->redirect('/users/create');
         } catch (Exception $e) {
-            return view('users.create', [
-                'error' => 'Failed to create user'
-            ]);
+            return $this->withError('An error occurred: ' . $e->getMessage())
+                ->redirect('/users/create');
+        }
+    }
+    
+    public function update($id)
+    {
+        try {
+            $user = $this->user->find($id);
+            
+            if (!$user) {
+                return $this->withError('User not found')
+                    ->redirect('/users');
+            }
+            
+            $request = new UserUpdateRequest();
+            
+            if (!$request->validate()) {
+                return $request->failedValidation();
+            }
+            
+            $data = $request->validated();
+            
+            // Using static method for update
+            $success = User::update($id, $data);
+            
+            if ($success) {
+                return $this->withSuccess('User updated successfully')
+                    ->redirect('/users');
+            }
+            
+            return $this->withError('Failed to update user')
+                ->redirect('/users/edit/' . $id);
+        } catch (Exception $e) {
+            return $this->withError('An error occurred: ' . $e->getMessage())
+                ->redirect('/users/edit/' . $id);
+        }
+    }
+    
+    public function destroy($id)
+    {
+        try {
+            $user = $this->user->find($id);
+            
+            if (!$user) {
+                return $this->withError('User not found')
+                    ->redirect('/users');
+            }
+            
+            // Using static method for delete
+            $success = User::delete($id);
+            
+            if ($success) {
+                return $this->withSuccess('User deleted successfully')
+                    ->redirect('/users');
+            }
+            
+            return $this->withError('Failed to delete user')
+                ->redirect('/users');
+        } catch (Exception $e) {
+            return $this->withError('An error occurred: ' . $e->getMessage())
+                ->redirect('/users');
         }
     }
 }
 ```
+
+## Form Request Validation
+
+Create specific classes for form requests:
+
+```php
+<?php
+
+namespace App\Http\Requests;
+
+use Src\Handlers\ValidationHandler;
+
+class UserStoreRequest
+{
+    protected ValidationHandler $validator;
+    protected ?array $validatedData = null;
+    
+    public function __construct()
+    {
+        $this->validator = new ValidationHandler();
+    }
+    
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|min:3|max:100',
+            'email' => 'required|email',
+            'password' => 'required|min:8'
+        ];
+    }
+    
+    public function validate(): bool
+    {
+        $this->validatedData = $this->validator->make($_POST, $this->rules());
+        return $this->validatedData !== false;
+    }
+    
+    public function validated(): ?array
+    {
+        return $this->validatedData;
+    }
+    
+    public function failedValidation()
+    {
+        return $this->validator->returnBackWithValidationErrors();
+    }
+}
+```
+
+## Models: Static vs Instance Methods
+
+For CRUD operations, you can use both static and instance methods:
+
+```php
+// Static methods
+$user = User::find(1);
+User::update(1, ['name' => 'New Name']);
+User::delete(1);
+
+// Instance methods (note: fetch an instance first)
+$userModel = new User();
+$users = $userModel->all();
+```
+
+**Note:** For update and delete operations, always use static methods to avoid the "Call to undefined method stdClass::update()" error, as find() returns a stdClass object, not a model instance.
 
 ## Routing
 
@@ -116,22 +272,18 @@ Define your routes in the `route/web.php` file:
 use Src\Facades\Router;
 
 // Basic routes
-Router::run('/test', 'UserController@index', 'get');
-Router::run('/test/store', 'UserController@store', 'post');
+Router::run('/users', 'UserController@index', 'get');
+Router::run('/users/create', 'UserController@create', 'get');
+Router::run('/users/store', 'UserController@store', 'post');
 
 // Routes with parameters
-Router::run('/user/{id}', 'UserController@show', 'get');
-Router::run('/user/{id}/edit', 'UserController@edit', 'get');
-Router::run('/user/{id}', 'UserController@update', 'put');
-Router::run('/user/{id}', 'UserController@destroy', 'delete');
-
-// Using callbacks
-Router::run('/hello', function() {
-    echo 'Hello World!';
-});
+Router::run('/users/{id}', 'UserController@show', 'get');
+Router::run('/users/{id}/edit', 'UserController@edit', 'get');
+Router::run('/users/{id}', 'UserController@update', 'put');
+Router::run('/users/{id}', 'UserController@destroy', 'delete');
 
 // Apply middleware to a route
-Router::middleware('/user/{id}', 'get', 'auth');
+Router::middleware('/users/{id}', 'get', 'auth');
 ```
 
 ## HTTP Request
@@ -198,43 +350,16 @@ $token = _token();
 <?= csrf_field() ?>
 ```
 
-## Service Providers
+## Views
 
-Create custom service providers to bootstrap application components:
-
-```php
-<?php
-
-namespace App\Providers;
-
-use Bootstrap\Provider;
-
-class AppServiceProvider extends Provider
-{
-    public static function boot(): void
-    {
-        // Register error handler
-        \App\Http\Exceptions\Whoops::handle();
-        
-        // Set application timezone
-        date_default_timezone_set('UTC');
-    }
-}
-```
-
-Register providers in `config/app.php`:
+Create views in the `view/` directory and use them in your controllers:
 
 ```php
-<?php
+// From a controller
+return $this->view('users/index', compact('users'));
 
-return [
-    'providers' => [
-        App\Providers\AppServiceProvider::class,
-        App\Providers\SessionServiceProvider::class,
-        App\Providers\RequestServiceProvider::class,
-        App\Providers\DotEnvServiceProvider::class,
-    ]
-];
+// Or use the helper function
+return view('users/edit', ['user' => $user]);
 ```
 
 ## Database ORM Features
