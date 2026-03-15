@@ -8,6 +8,10 @@ use Src\Facades\Router;
  * Define your routes for the web interface here
  */
 
+Router::run('/', function () {
+    redirect('/users');
+}, 'get');
+
 Router::run('/users', 'UserController@index', 'get');
 Router::run('/users/create', 'UserController@create', 'get');
 Router::run('/users/store', 'UserController@store', 'post');

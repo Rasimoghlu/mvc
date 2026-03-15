@@ -41,7 +41,6 @@ DB_PASSWORD=
 3. Run the application:
 
 ```bash
-cd public
 php -S localhost:8000
 ```
 
@@ -508,6 +507,7 @@ mvc/
 ├── view/
 │   ├── errors/
 │   └── users/
+├── index.php
 ├── .env
 ├── .env.example
 └── composer.json

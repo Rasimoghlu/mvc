@@ -6,6 +6,7 @@ use App\Http\Exceptions\MethodNotFoundException;
 use App\Http\Exceptions\ModelNotFoundException;
 use DateTime;
 use Exception;
+use Src\DatabaseConnection;
 use Src\Handlers\QueryBuilderHandler;
 
 /**
@@ -149,7 +150,8 @@ class Model
         
         if ($instance->timestamps) {
             try {
-                $stmt = $instance->handler->db->connect()->prepare("SHOW COLUMNS FROM {$instance->table} LIKE ?");
+                $pdo = DatabaseConnection::getInstance()->connect();
+                $stmt = $pdo->prepare("SHOW COLUMNS FROM {$instance->table} LIKE ?");
                 $stmt->execute([$instance->updatedField]);
                 if ($stmt->fetchColumn() !== false) {
                     $data[$instance->updatedField] = (new DateTime())->format('Y-m-d H:i:s');
@@ -158,7 +160,7 @@ class Model
                 // Column doesn't exist, just continue without timestamp
             }
         }
-        
+
         return $instance->handler->where($instance->primaryKey, '=', $id)->update($data);
     }
 
@@ -181,7 +183,8 @@ class Model
             $now = (new DateTime())->format('Y-m-d H:i:s');
 
             try {
-                $stmt = $instance->handler->db->connect()->prepare("SHOW COLUMNS FROM {$instance->table} LIKE ?");
+                $pdo = DatabaseConnection::getInstance()->connect();
+                $stmt = $pdo->prepare("SHOW COLUMNS FROM {$instance->table} LIKE ?");
 
                 $stmt->execute([$instance->createdField]);
                 if ($stmt->fetchColumn() !== false) {

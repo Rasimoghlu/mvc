@@ -24,7 +24,7 @@ class Provider
      */
     private static function getProviders()
     {
-        $app = include_once '../config/app.php';
+        $app = include_once __DIR__ . '/../config/app.php';
         
         foreach ($app['providers'] as $provider) {
             $provider::boot();
