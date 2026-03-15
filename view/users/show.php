@@ -9,24 +9,24 @@
 <body>
     <div class="container">
         <h1>User Details</h1>
-        
+
         <?php if (isset($success)): ?>
-            <div class="success"><?= $success ?></div>
+            <div class="success"><?= e($success) ?></div>
         <?php endif; ?>
-        
+
         <?php if (isset($error)): ?>
-            <div class="error"><?= $error ?></div>
+            <div class="error"><?= e($error) ?></div>
         <?php endif; ?>
-        
+
         <?php if (isset($user)): ?>
             <div class="user-details">
-                <p><strong>ID:</strong> <?= $user->id ?? 'N/A' ?></p>
-                <p><strong>Name:</strong> <?= $user->name ?? 'N/A' ?></p>
-                <p><strong>Email:</strong> <?= $user->email ?? 'N/A' ?></p>
-                
+                <p><strong>ID:</strong> <?= e($user->id ?? 'N/A') ?></p>
+                <p><strong>Name:</strong> <?= e($user->name ?? 'N/A') ?></p>
+                <p><strong>Email:</strong> <?= e($user->email ?? 'N/A') ?></p>
+
                 <div class="actions" style="margin-top: 20px;">
-                    <a href="/users/<?= $user->id ?? 0 ?>/edit" class="edit">Edit</a>
-                    <form method="POST" action="/users/<?= $user->id ?? 0 ?>" style="display:inline;">
+                    <a href="/users/<?= e($user->id ?? 0) ?>/edit" class="edit">Edit</a>
+                    <form method="POST" action="/users/<?= e($user->id ?? 0) ?>" style="display:inline;">
                         <?= csrf_field() ?>
                         <input type="hidden" name="_method" value="DELETE">
                         <button type="submit" class="delete" onclick="return confirm('Are you sure you want to delete this user?')" style="background: none; border: none; color: white; background-color: #e74c3c; padding: 6px 10px; border-radius: 3px; cursor: pointer;">Delete</button>
@@ -40,4 +40,4 @@
         <?php endif; ?>
     </div>
 </body>
-</html> 
+</html>

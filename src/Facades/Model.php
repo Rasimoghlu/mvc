@@ -147,11 +147,11 @@ class Model
             $data = array_intersect_key($data, array_flip($instance->fillable));
         }
         
-        // Add timestamps if enabled and column exists
         if ($instance->timestamps) {
             try {
-                $instance->handler->db->connect()->query("SHOW COLUMNS FROM {$instance->table} LIKE '{$instance->updatedField}'");
-                if ($instance->handler->db->connect()->rowCount() > 0) {
+                $stmt = $instance->handler->db->connect()->prepare("SHOW COLUMNS FROM {$instance->table} LIKE ?");
+                $stmt->execute([$instance->updatedField]);
+                if ($stmt->fetchColumn() !== false) {
                     $data[$instance->updatedField] = (new DateTime())->format('Y-m-d H:i:s');
                 }
             } catch (Exception $e) {
@@ -177,20 +177,19 @@ class Model
             $data = array_intersect_key($data, array_flip($instance->fillable));
         }
         
-        // Add timestamps if enabled and columns exist
         if ($instance->timestamps) {
             $now = (new DateTime())->format('Y-m-d H:i:s');
-            
+
             try {
-                // Check if created_at column exists
-                $instance->handler->db->connect()->query("SHOW COLUMNS FROM {$instance->table} LIKE '{$instance->createdField}'");
-                if ($instance->handler->db->connect()->rowCount() > 0) {
+                $stmt = $instance->handler->db->connect()->prepare("SHOW COLUMNS FROM {$instance->table} LIKE ?");
+
+                $stmt->execute([$instance->createdField]);
+                if ($stmt->fetchColumn() !== false) {
                     $data[$instance->createdField] = $now;
                 }
-                
-                // Check if updated_at column exists
-                $instance->handler->db->connect()->query("SHOW COLUMNS FROM {$instance->table} LIKE '{$instance->updatedField}'");
-                if ($instance->handler->db->connect()->rowCount() > 0) {
+
+                $stmt->execute([$instance->updatedField]);
+                if ($stmt->fetchColumn() !== false) {
                     $data[$instance->updatedField] = $now;
                 }
             } catch (Exception $e) {

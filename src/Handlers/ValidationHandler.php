@@ -110,25 +110,34 @@ class ValidationHandler implements ValidationInterface
     protected function validateField(string $field, string $ruleString): void
     {
         $rules = explode('|', $ruleString);
-        
-        // Check if field is required or exists before other validations
+
+        $isSometimes = in_array('sometimes', $rules);
         $isRequired = in_array('required', $rules);
-        $fieldExists = isset($this->data[$field]) && $this->data[$field] !== '';
-        
+        $fieldPresent = array_key_exists($field, $this->data);
+        $fieldExists = $fieldPresent && $this->data[$field] !== '';
+
+        // sometimes: skip ALL validation if field is not present in data
+        if ($isSometimes && !$fieldPresent) {
+            return;
+        }
+
         // Skip validation if field is not required and does not exist
         if (!$isRequired && !$fieldExists) {
             return;
         }
-        
+
         // Check required rule first
         if ($isRequired && !$fieldExists) {
             $this->addError($field, 'required');
-            return; // Skip other validations if required field is missing
+            return;
         }
-        
+
         // Apply all other rules if field exists
         if ($fieldExists) {
             foreach ($rules as $rule) {
+                if ($rule === 'sometimes') {
+                    continue;
+                }
                 $this->applyRule($field, $rule);
             }
         }
@@ -165,7 +174,7 @@ class ValidationHandler implements ValidationInterface
                 break;
                 
             case 'integer':
-                if (!filter_var($value, FILTER_VALIDATE_INT)) {
+                if (filter_var($value, FILTER_VALIDATE_INT) === false) {
                     $this->addError($field, $rule);
                 }
                 break;
@@ -300,11 +309,20 @@ class ValidationHandler implements ValidationInterface
      * 
      * @return never
      */
-    public function returnBackWithValidationErrors()
+    public function returnBackWithValidationErrors(): never
     {
         $this->storeErrors();
-        
-        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/'));
+
+        $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+
+        $parsed = parse_url($referer);
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        if (isset($parsed['host']) && $parsed['host'] !== $host) {
+            $referer = '/';
+        }
+
+        header('Location: ' . $referer);
         exit;
     }
 }

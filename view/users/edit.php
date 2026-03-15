@@ -9,30 +9,30 @@
 <body>
     <div class="container">
         <h1>User Edit</h1>
-        
+
         <?php if (isset($success)): ?>
-            <div class="success"><?= $success ?></div>
+            <div class="success"><?= e($success) ?></div>
         <?php endif; ?>
-        
+
         <?php if (isset($error)): ?>
-            <div class="error"><?= $error ?></div>
+            <div class="error"><?= e($error) ?></div>
         <?php endif; ?>
-        
+
         <?php if (isset($user)): ?>
-            <form action="/users/<?= $user->id ?? 0 ?>" method="post">
+            <form action="/users/<?= e($user->id ?? 0) ?>" method="post">
                 <?= csrf_field() ?>
                 <input type="hidden" name="_method" value="PUT">
-                
+
                 <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="<?= $user->name ?? '' ?>">
+                    <input type="text" class="form-control" id="name" name="name" value="<?= e($user->name ?? '') ?>">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?= $user->email ?? '' ?>">
+                    <input type="email" class="form-control" id="email" name="email" value="<?= e($user->email ?? '') ?>">
                 </div>
-                
+
                 <div class="form-group" style="margin-top: 20px;">
                     <button type="submit" class="btn btn-primary">Update</button>
                     <a href="/users" style="margin-left: 10px; display: inline-block; background-color: #7f8c8d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">Cancel</a>
@@ -44,4 +44,4 @@
         <?php endif; ?>
     </div>
 </body>
-</html> 
+</html>

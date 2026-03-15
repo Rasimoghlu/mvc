@@ -10,8 +10,8 @@
     <div class="error-container">
         <h1>500</h1>
         <h2>Server Error</h2>
-        <p><?= isset($message) ? $message : 'Sorry, something went wrong. Please try again later.' ?></p>
+        <p>Sorry, something went wrong. Please try again later.</p>
         <a href="/">Go to home</a>
     </div>
 </body>
-</html> 
+</html>

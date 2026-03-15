@@ -1055,12 +1055,20 @@ trait BuilderTrait
     public function count(): int
     {
         try {
-            $sql = $this->prepareQuery();
-            
-            $statement = $this->db->connect()->prepare($sql);
+            $countSql = "SELECT COUNT(*) FROM {$this->table}";
+            $countSql .= $this->joins();
+            $countSql .= $this->whereQuery();
+            $countSql .= $this->orWhereQuery();
+            $countSql .= $this->whereInQuery();
+            $countSql .= $this->orWhereInQuery();
+            $countSql .= $this->whereNotInQuery();
+            $countSql .= $this->groupByQuery();
+            $countSql .= $this->havingQuery();
+
+            $statement = $this->db->connect()->prepare($countSql);
             $statement->execute($this->getFlattenedParams());
-            
-            return $statement->rowCount();
+
+            return (int) $statement->fetchColumn();
         } catch (Exception $e) {
             throw new Exception("Count query failed: " . $e->getMessage());
         }

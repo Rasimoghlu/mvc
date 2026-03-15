@@ -52,7 +52,7 @@ class AuthHandler implements AuthInterface
             
             // Check if user exists and verify password
             if ($user && $this->verifyPassword($data['password'], $user->password)) {
-                // Store user in session
+                session_regenerate_id(true);
                 $this->setUserSession($user);
                 return $user;
             }
@@ -147,12 +147,6 @@ class AuthHandler implements AuthInterface
      */
     private function verifyPassword(string $password, string $hash): bool
     {
-        // If password is stored using SHA1 (legacy)
-        if (strlen($hash) === 40) {
-            return sha1($password) === $hash;
-        }
-        
-        // Otherwise use secure password_verify (for passwords hashed with password_hash)
         return password_verify($password, $hash);
     }
 

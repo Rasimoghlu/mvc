@@ -45,7 +45,8 @@ class DatabaseConnection
             $this->connect->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
         } catch(PDOException $e) {
-            echo "Connection failed: " . $e->getMessage();
+            error_log("Database connection failed: " . $e->getMessage());
+            throw new \RuntimeException("Database connection failed.");
         }
     }
 

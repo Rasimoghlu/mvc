@@ -128,9 +128,18 @@ class Controller
      * @param int $statusCode HTTP status code
      * @return never
      */
-    protected function back(int $statusCode = 302)
+    protected function back(int $statusCode = 302): never
     {
-        return redirect($_SERVER['HTTP_REFERER'] ?? '/', $statusCode);
+        $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+
+        $parsed = parse_url($referer);
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        if (isset($parsed['host']) && $parsed['host'] !== $host) {
+            $referer = '/';
+        }
+
+        redirect($referer, $statusCode);
     }
     
     /**

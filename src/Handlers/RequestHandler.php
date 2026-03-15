@@ -6,65 +6,36 @@ use App\Interfaces\RequestInterface;
 
 class RequestHandler implements RequestInterface
 {
-    /**
-     * @var string
-     */
     private string $scriptName;
-
-    /**
-     * @var string
-     */
     private string $baseUrl;
-
-    /**
-     * @var string
-     */
     private string $url;
-
-    /**
-     * @var string
-     */
     private string $fullUrl;
-
-    /**
-     * @var string
-     */
     private string $queryString;
 
-    /**
-     *
-     */
     public function __construct()
     {
         $this->checkCsrfToken();
     }
 
-    private function checkCsrfToken()
+    private function checkCsrfToken(): void
     {
-        if (strtolower($_SERVER['REQUEST_METHOD']) === 'post') {
-            if (!isset($_POST['_token'])) {
-                echo '<div style="background-color: #ffecec; color: red; padding: 10px; margin: 10px 0; border-left: 4px solid red;">
-                    WARNING: CSRF Token missing! This is a security risk.
-                </div>';
-            } 
-            elseif (isset($_SESSION['_token']) && $_SESSION['_token'] !== $_POST['_token']) {
-                echo '<div style="background-color: #ffecec; color: red; padding: 10px; margin: 10px 0; border-left: 4px solid red;">
-                    WARNING: Invalid CSRF Token! Expected: '.$_SESSION['_token'].', Received: '.$_POST['_token'].'
-                </div>';
-            }
-            
-            if (isset($_SESSION['_token'])) {
-                echo '<div style="background-color: #e7f7e9; color: green; padding: 10px; margin: 10px 0; border-left: 4px solid green;">
-                    Current Session Token: '.$_SESSION['_token'].'<br>
-                    Submitted Token: '.(isset($_POST['_token']) ? $_POST['_token'] : 'None').'
-                </div>';
-            }
+        if (strtolower($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'post') {
+            return;
+        }
+
+        if (!isset($_POST['_token']) || !isset($_SESSION['_token'])) {
+            http_response_code(403);
+            echo '403 Forbidden: CSRF token missing.';
+            exit;
+        }
+
+        if (!hash_equals($_SESSION['_token'], $_POST['_token'])) {
+            http_response_code(403);
+            echo '403 Forbidden: CSRF token mismatch.';
+            exit;
         }
     }
 
-    /**
-     * @return void
-     */
     public function handle(): void
     {
         $this->scriptName = str_replace('\\', '', dirname($_SERVER['SCRIPT_NAME']));
@@ -72,10 +43,7 @@ class RequestHandler implements RequestInterface
         $this->setUrl();
     }
 
-    /**
-     * @return string
-     */
-    public function setBaseUrl()
+    public function setBaseUrl(): string
     {
         $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
@@ -87,10 +55,7 @@ class RequestHandler implements RequestInterface
         return $this->baseUrl = $protocol . $host . $scriptName;
     }
 
-    /**
-     * @return void
-     */
-    public function setUrl()
+    public function setUrl(): void
     {
         $requestUri = urldecode($_SERVER['REQUEST_URI']);
         $requestUri = rtrim(preg_replace("#^" . $this->scriptName . '#', '', $requestUri), '/');
@@ -100,100 +65,61 @@ class RequestHandler implements RequestInterface
         $this->fullUrl = $requestUri;
 
         if (str_contains($requestUri, '?')) {
-            list($requestUri, $queryString) = explode('?', $requestUri);
+            [$requestUri, $queryString] = explode('?', $requestUri);
         }
 
         $this->url = $requestUri;
         $this->queryString = $queryString;
-
     }
 
-    /**
-     * @return string
-     */
-    public function baseUrl()
+    public function baseUrl(): string
     {
         return $this->baseUrl;
     }
 
-    /**
-     * @return string
-     */
-    public function url()
+    public function url(): string
     {
         return $this->url;
     }
 
-    /**
-     * @return string
-     */
-    public function queryString()
+    public function queryString(): string
     {
         return $this->queryString;
     }
 
-    /**
-     * @return string
-     */
-    public function fullUrl()
+    public function fullUrl(): string
     {
         return $this->fullUrl;
     }
 
-    /**
-     * @return mixed
-     */
-    public function method()
+    public function method(): string
     {
         return $_SERVER['REQUEST_METHOD'];
     }
 
-    /**
-     * @param array $type
-     * @param string $key
-     * @return bool
-     */
-    public function has(array $type, string $key)
+    public function has(array $type, string $key): bool
     {
         return array_key_exists($key, $type);
     }
 
-    /**
-     * @param string $key
-     * @param $type
-     * @return mixed|null
-     */
-    public function value(string $key, $type = null)
+    public function value(string $key, ?array $type = null): mixed
     {
         $type = $type ?? $_REQUEST;
 
         return $this->has($type, $key) ? $type[$key] : null;
     }
 
-    /**
-     * @param string $key
-     * @return mixed|null
-     */
-    public function get(string $key)
+    public function get(string $key): mixed
     {
-        return $this->value(strip_tags($key), $_GET);
+        return $this->value($key, $_GET);
     }
 
-    /**
-     * @param string $key
-     * @return mixed|null
-     */
-    public function post(string $key)
+    public function post(string $key): mixed
     {
-        return $this->value(strip_tags($key), $_POST);
+        return $this->value($key, $_POST);
     }
 
-    /**
-     * @param string $key
-     * @param $value
-     * @return mixed
-     */
-    public function set(string $key, $value)
+    public function set(string $key, mixed $value): mixed
     {
         $_REQUEST[$key] = $value;
         $_GET[$key] = $value;
@@ -202,16 +128,11 @@ class RequestHandler implements RequestInterface
         return $value;
     }
 
-    /**
-     * @return array
-     */
-    public function all()
+    public function all(): array
     {
-        if (isset($_REQUEST['url']) || isset($_REQUEST['_token'])) {
-            unset($_REQUEST['url'], $_REQUEST['_token']);
-        }
+        $data = $_REQUEST;
+        unset($data['url'], $data['_token']);
 
-        return $_REQUEST;
+        return $data;
     }
-
 }

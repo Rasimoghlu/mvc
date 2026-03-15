@@ -28,6 +28,7 @@ class UserController extends Controller
      */
     public function __construct()
     {
+        parent::__construct();
         $this->user = new User();
     }
     
@@ -123,11 +124,12 @@ class UserController extends Controller
             return $this->withError('Failed to create user')
                 ->redirect('/users/create');
         } catch (\Exception $e) {
-            return $this->withError('An error occurred: ' . $e->getMessage())
+            error_log('User store error: ' . $e->getMessage());
+            return $this->withError('An error occurred while creating user.')
                 ->redirect('/users/create');
         }
     }
-    
+
     /**
      * Update the specified user
      *
@@ -138,32 +140,33 @@ class UserController extends Controller
     {
         try {
             $user = $this->user->find($id);
-            
+
             if (!$user) {
                 return $this->withError('User not found')
                     ->redirect('/users');
             }
-            
+
             $request = new UserUpdateRequest();
-            
+
             if (!$request->validate()) {
                 return $request->failedValidation();
             }
-            
+
             $data = $request->validated();
-            
+
             $success = User::update($id, $data);
-            
+
             if ($success) {
                 return $this->withSuccess('User updated successfully')
                     ->redirect('/users');
             }
-            
+
             return $this->withError('Failed to update user')
-                ->redirect('/users/edit/' . $id);
+                ->redirect('/users/' . $id . '/edit');
         } catch (\Exception $e) {
-            return $this->withError('An error occurred: ' . $e->getMessage())
-                ->redirect('/users/edit/' . $id);
+            error_log('User update error: ' . $e->getMessage());
+            return $this->withError('An error occurred while updating user.')
+                ->redirect('/users/' . $id . '/edit');
         }
     }
     
@@ -193,7 +196,8 @@ class UserController extends Controller
             return $this->withError('Failed to delete user')
                 ->redirect('/users');
         } catch (\Exception $e) {
-            return $this->withError('An error occurred: ' . $e->getMessage())
+            error_log('User delete error: ' . $e->getMessage());
+            return $this->withError('An error occurred while deleting user.')
                 ->redirect('/users');
         }
     }
