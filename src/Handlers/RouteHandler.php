@@ -23,6 +23,7 @@ class RouteHandler implements RouteInterface
 
     protected array $middlewareMap = [
         'auth' => \App\Http\Middleware\AuthMiddleware::class,
+        'guest' => \App\Http\Middleware\GuestMiddleware::class,
     ];
 
     private function getRequestMethod(): string

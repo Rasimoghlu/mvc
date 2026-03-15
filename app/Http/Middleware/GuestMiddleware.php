@@ -5,12 +5,12 @@ namespace App\Http\Middleware;
 use App\Interfaces\MiddlewareInterface;
 use Src\Facades\Auth;
 
-class AuthMiddleware implements MiddlewareInterface
+class GuestMiddleware implements MiddlewareInterface
 {
     public function handle(): bool
     {
-        if (Auth::guest()) {
-            redirect('/login');
+        if (Auth::check()) {
+            redirect('/tasks');
         }
 
         return true;
